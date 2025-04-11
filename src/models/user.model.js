@@ -1,4 +1,6 @@
 import mongoose from "mongoose"
+import bcrypt from "bcrypt"
+import jwt from "jsonwebtoken"
 const UserSchema = mongoose.Schema({
     username:{
         type:String,
@@ -43,5 +45,13 @@ const UserSchema = mongoose.Schema({
     ]
 
 },{timestamps:true})
+
+UserSchema.pre("save",async function (next){
+    if(!this.isModified("password")) return next();
+       this.password = bcrypt.hash(this.password,10) //kisko hash krna hai aur no of of rounds .
+       next()
+}
+)
+
 
 export const User = mongoose.model("User",UserSchema);
