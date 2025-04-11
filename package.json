@@ -1,0 +1,15 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "description": "backend for training",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+   "dev":"nodemon src/index.js"
+  },
+  "author": "Satyam",
+  "license": "ISC",
+  "devDependencies": {
+    "nodemon": "^3.1.9"
+  }
+}
