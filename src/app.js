@@ -1,6 +1,6 @@
 import express from "express"
 import cors from "cors"
-import cookiePraser from "cookie-parser"
+import cookieParser from "cookie-parser";
 
 
 const app = express();
@@ -17,7 +17,7 @@ app.use(express.urlencoded({
     limit:"16kb"
 }))//url k liye.
 app.use(express.static("public"))//image k liye
-app.use(express.cookiePraser())
+app.use(cookieParser());
 
 import userRouter from "./routers/user.route.js"
 //route declaration
