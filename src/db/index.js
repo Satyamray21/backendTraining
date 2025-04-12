@@ -8,7 +8,7 @@ const connectDB = async ()=>{
     }
     catch (error)
     {
-        console.error("Conncetion failed");
+        console.error("Conncetion failed",error.message);
         process.exit(1);
     }
 }
