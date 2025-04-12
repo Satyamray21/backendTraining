@@ -19,4 +19,8 @@ app.use(express.urlencoded({
 app.use(express.static("public"))//image k liye
 app.use(express.cookiePraser())
 
+import userRouter from "./routers/user.route.js"
+//route declaration
+app.use("/api/v1/users",userRouter)//phela api hota aur dursa kaha route hota hai
+
 export {app}
