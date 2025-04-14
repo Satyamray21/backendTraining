@@ -187,6 +187,24 @@ const changePassword = asyncHandler(async (req, res) => {
     .status(200)
     .json(new ApiRespone(200, {}, "User password successfully changed"));
 });
+const deleteByEmail = asyncHandler(async (req, res) => {
+  const { email } = req.body; // Get the email from the request body
+  console.log('Delete request received for email:', req.body.email);
+  // Ensure email is provided
+  if (!email) {
+    throw new ApiError(400, "Email is required to delete the user");
+  }
+
+  // Check if user exists and delete the user by email
+  const user = await User.findOneAndDelete({ email });
+  if (!user) {
+    throw new ApiError(404, "User not found");
+  }
+
+  return res.status(200).json(
+    new ApiRespone(200, {}, "User deleted successfully")
+  );
+});
 
 
-export { registerUser, loginUser, loggedOut,refreshAccessToken,changePassword };
+export { registerUser, loginUser, loggedOut,refreshAccessToken,changePassword, deleteByEmail};
