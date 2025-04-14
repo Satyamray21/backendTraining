@@ -205,6 +205,21 @@ const deleteByEmail = asyncHandler(async (req, res) => {
     new ApiRespone(200, {}, "User deleted successfully")
   );
 });
+const findAllUser = asyncHandler(async (req,res)=>{
+  const users = await User.find().select("-password -refreshtoken")
+  if(!users)
+  {
+    throw new ApiError(404,"No user found in db");
+  }
+  res
+  .status(200)
+  .json(
+    new ApiRespone(
+      200,
+      users,"All User sucessfully fetched:"
+    )
+  )
+})
 
 
-export { registerUser, loginUser, loggedOut,refreshAccessToken,changePassword, deleteByEmail};
+export { registerUser, loginUser, loggedOut,refreshAccessToken,changePassword, deleteByEmail,findAllUser};
