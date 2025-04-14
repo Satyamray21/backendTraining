@@ -19,5 +19,5 @@ router.route("/register").post(
     router.route("/refresh-token").post(refreshAccessToken)
     router.route("/changePassword").post(verifyJwt,changePassword)
     router.route("/deleteUserByEmail").delete(deleteByEmail);
-    router.route("/getAllUser").get(findAllUser);
+    router.route("/getAllUser").get(verifyJwt,findAllUser);
 export default router;

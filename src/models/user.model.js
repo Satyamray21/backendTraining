@@ -39,6 +39,10 @@ const UserSchema = mongoose.Schema(
     refreshToken: {
       type: String,
     },
+    role:{
+      type:String,
+      enum:["user","admin"]
+    },
     watchHistory: [
       {
         type: mongoose.Schema.Types.ObjectId,

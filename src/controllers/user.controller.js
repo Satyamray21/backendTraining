@@ -20,9 +20,9 @@ const generateAccessTokenAndRefreshToken = async (userId) => {
 };
 
 const registerUser = asyncHandler(async (req, res) => {
-  const { fullName, username, email, password } = req.body;
+  const { fullName, username, email, password ,role} = req.body;
 
-  if ([fullName, username, email, password].some((field) => field?.trim() === "")) {
+  if ([fullName, username, email, password,role].some((field) => field?.trim() === "")) {
     throw new ApiError(400, "All fields are required");
   }
 
@@ -54,7 +54,8 @@ const registerUser = asyncHandler(async (req, res) => {
     coverImage: coverImage?.url || "",
     email,
     password,
-    username: username.toLowerCase()
+    username: username.toLowerCase(),
+    role
   });
 
   const createdUser = await User.findById(user._id).select("-password -refreshToken");
@@ -206,8 +207,16 @@ const deleteByEmail = asyncHandler(async (req, res) => {
   );
 });
 const findAllUser = asyncHandler(async (req,res)=>{
-  const users = await User.find().select("-password -refreshtoken")
-  if(!users)
+  if (req.user.role !== "admin") {
+    return res.
+    status(403)
+    .json({
+      success: false,
+      message: "Access denied: Admins only"
+    });
+  }
+  const users = await User.find().select("-password -refreshToken")
+  if(!users || users.length === 0)
   {
     throw new ApiError(404,"No user found in db");
   }
