@@ -1,7 +1,9 @@
 import {Router} from "express";
-import { registerUser, loginUser ,loggedOut,refreshAccessToken,changePassword,deleteByEmail, findAllUser} from "../controllers/user.controller.js";
+import { registerUser, loginUser ,loggedOut,refreshAccessToken,changePassword,deleteByEmail, findAllUser,sentResetCode} from "../controllers/user.controller.js";
 import {upload} from "../middlewares/multer.middleware.js"
 import {verifyJwt}  from "../middlewares/auth.middleware.js";
+import verifyCode from "../middlewares/verifyEmail.middleware.js";
+
 const router = Router()
 router.route("/register").post(
     upload.fields([
@@ -17,7 +19,8 @@ router.route("/register").post(
     router.route("/login").post(loginUser)
     router.route("/logout").post(verifyJwt,loggedOut)
     router.route("/refresh-token").post(refreshAccessToken)
-    router.route("/changePassword").post(verifyJwt,changePassword)
+    router.route("/changePassword").post(verifyCode,changePassword)
     router.route("/deleteUserByEmail").delete(deleteByEmail);
     router.route("/getAllUser").get(verifyJwt,findAllUser);
+    router.route("/send-reset-code").post(sentResetCode);
 export default router;

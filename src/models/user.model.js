@@ -49,6 +49,12 @@ const UserSchema = mongoose.Schema(
         ref: "Video",
       },
     ],
+    verificationCode: {
+      type: String,
+    },
+    verificationCodeExpires: {
+      type: Date,
+    },
   },
   { timestamps: true }
 );
