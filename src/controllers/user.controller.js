@@ -170,13 +170,18 @@ const refreshAccessToken = asyncHandler(async (req,res)=>{
 
 })
 const changePassword = asyncHandler(async (req, res) => {
-  const { oldpassword, newPassword, email, code } = req.body;
+  console.log("🔐 Incoming request to change password");
+  console.log("req.user:", req.user);
+  console.log("req.body:", req.body);
 
+  const { oldpassword, newPassword, email, code } = req.body;
   let user;
 
-  // Case 1: Use old password to verify
+  // Case 1: Authenticated user using old password
   if (oldpassword) {
     user = await User.findById(req.user?._id);
+    console.log("👤 Found user:", user?.email);
+
     if (!user) {
       throw new ApiError(404, "User not found");
     }
@@ -187,9 +192,10 @@ const changePassword = asyncHandler(async (req, res) => {
     }
   }
 
-  // Case 2: Use reset code (no login required)
+  // Case 2: Reset password via email+code (unauthenticated route)
   else if (email && code) {
     user = await User.findOne({ email });
+
     if (!user) {
       throw new ApiError(404, "User not found");
     }
@@ -204,6 +210,9 @@ const changePassword = asyncHandler(async (req, res) => {
     // Clear the code fields after success
     user.verificationCode = undefined;
     user.verificationCodeExpires = undefined;
+
+    // Save user after clearing the verification code
+    await user.save({ validateBeforeSave: false });
   }
 
   // Neither method provided
@@ -211,14 +220,16 @@ const changePassword = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Provide either old password or reset code");
   }
 
-  // Save the new password
+  // Save new password
   user.password = newPassword;
   await user.save({ validateBeforeSave: false });
 
+  // Send successful response
   return res
     .status(200)
-    .json(new ApiRespone(200, {}, "User password successfully changed"));
+    .json(new ApiRespone (200, {}, "✅ User password successfully changed"));
 });
+
 
 const deleteByEmail = asyncHandler(async (req, res) => {
   const { email } = req.body; // Get the email from the request body
@@ -302,5 +313,12 @@ const sentResetCode = asyncHandler(async(req,res)=>{
     res.status(500).json({ message: "Something went wrong" });
   }
 })
+const getUserDetails = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.user._id).select("-password -refreshToken");
+  if (!user) {
+    throw new ApiError(404, "User not found");
+  }
+  return res.status(200).json(new ApiRespone(200, user, "User details fetched"));
+});
 
-export { registerUser, loginUser, loggedOut,refreshAccessToken,changePassword, deleteByEmail,findAllUser,sentResetCode};
+export { registerUser, loginUser, loggedOut,refreshAccessToken,changePassword, deleteByEmail,findAllUser,sentResetCode,getUserDetails};

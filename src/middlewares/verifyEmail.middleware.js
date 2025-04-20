@@ -1,24 +1,26 @@
-import {User } from "../models/user.model.js"
+import { User } from "../models/user.model.js";
 import { ApiError } from "../utils/ApiError.js";
+import { asyncHandler } from "../utils/asyncHandler.js";
 
-import { asyncHandler } from "../utils/asyncHandler.js"
-const verifyCode = asyncHandler(async(req,res,next)=>{
-    try{
-        const {email,code}=req.body;
-        const user = await User.findOne({email})
-        if(!user || user.verificationCode !== code)
-        {
-            throw new ApiError(400,"user not found or verifiaction code didnt match");
-        }
-        if(user. verificationCodeExpires < Date.now())
-        {
-            throw new ApiError(400,"verifiaction code expired");
-        }
-        req.userToReset = user;
-        next();
-    }catch(error)
-    {
-        throw new ApiError(500,"Something went wrong");
-    }
-})
+const verifyCode = asyncHandler(async (req, res, next) => {
+  const { email, code } = req.body;
+
+  if (!email || !code) {
+    throw new ApiError(400, "Email and code are required");
+  }
+
+  const user = await User.findOne({ email });
+
+  if (!user || user.verificationCode !== code) {
+    throw new ApiError(400, "User not found or verification code didn’t match");
+  }
+
+  if (user.verificationCodeExpires < Date.now()) {
+    throw new ApiError(400, "Verification code expired");
+  }
+
+  req.userToReset = user;
+  next();
+});
+
 export default verifyCode;
