@@ -106,6 +106,7 @@ const loginUser = asyncHandler(async (req, res) => {
       new ApiRespone(
         200,
         {
+          role: user.role,
           user: loggedInUser,
           accessToken,
           refreshToken
