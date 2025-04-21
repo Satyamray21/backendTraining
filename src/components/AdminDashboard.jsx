@@ -10,6 +10,11 @@ import {
   Card,
   Avatar,
   Grid,
+  TextField,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 
@@ -18,9 +23,10 @@ const AdminDashboard = () => {
   const [error, setError] = useState('');
   const [users, setUsers] = useState([]);
   const [showAllUsers, setShowAllUsers] = useState(false);
+  const [deleteEmail, setDeleteEmail] = useState('');
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false); // Track dialog open state
   const navigate = useNavigate();
 
-  // Fetch current logged-in user
   useEffect(() => {
     const fetchUserData = async () => {
       try {
@@ -36,7 +42,6 @@ const AdminDashboard = () => {
     fetchUserData();
   }, []);
 
-  // Logout
   const handleLogout = async () => {
     try {
       await axios.post('http://localhost:5000/api/v1/users/logout', {}, { withCredentials: true });
@@ -47,12 +52,10 @@ const AdminDashboard = () => {
     }
   };
 
-  // Change password
   const handleChangePassword = () => {
     navigate('/change-password');
   };
 
-  // Fetch all users (admin only)
   const handleShowAllUsers = async () => {
     if (!showAllUsers) {
       try {
@@ -70,29 +73,54 @@ const AdminDashboard = () => {
     }
   };
 
-  // Delete a user by email
-  const handleDeleteUser = async (email) => {
-    if (!window.confirm(`Are you sure you want to delete user: ${email}?`)) return;
+  const handleDeleteUserByEmail = async () => {
+    if (!deleteEmail.trim()) {
+      alert('Please enter a valid email address.');
+      return;
+    }
+
+    const confirmDelete = window.confirm(`Are you sure you want to delete user: ${deleteEmail}?`);
+    if (!confirmDelete) return;
 
     try {
       await axios.delete('http://localhost:5000/api/v1/users/deleteUserByEmail', {
-        data: { email },
+        data: { email: deleteEmail },
         withCredentials: true,
       });
-      setUsers(prev => prev.filter(user => user.email !== email));
+      alert('User deleted successfully!');
+      setDeleteEmail('');
+
+      if (showAllUsers) {
+        setUsers(prev => prev.filter(u => u.email !== deleteEmail));
+      }
+
+      // Close the modal after successful deletion
+      setOpenDeleteDialog(false);
     } catch (err) {
-      console.error('Error deleting user:', err);
       setError('Failed to delete user');
+      console.error('Error deleting user:', err);
     }
+  };
+
+  const handleOpenDeleteDialog = () => {
+    setOpenDeleteDialog(true); // Open the delete dialog
+  };
+
+  const handleCloseDeleteDialog = () => {
+    setOpenDeleteDialog(false); // Close the delete dialog without taking action
   };
 
   return (
     <Box>
-      {/* AppBar */}
+      {/* AppBar with delete user trigger */}
       <AppBar position="static">
-        <Toolbar sx={{ display: 'flex', justifyContent: 'space-between' }}>
-          <Typography variant="h6">Admin Dashboard</Typography>
-          <Box sx={{ display: 'flex', gap: 2 }}>
+        <Toolbar sx={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap' }}>
+          <Typography variant="h6" sx={{ flex: 1, minWidth: '150px' }}>
+            Admin Dashboard
+          </Typography>
+
+          {/* Navigation Buttons */}
+          <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
             <Button color="inherit" onClick={handleChangePassword}>
               Change Password
             </Button>
@@ -101,56 +129,46 @@ const AdminDashboard = () => {
                 {showAllUsers ? 'My Profile' : 'All Users'}
               </Button>
             )}
-            <Button color="inherit" onClick={handleLogout}>
-              Logout
-            </Button>
+            {user?.role === 'admin' && (
+              <Button color="error" onClick={handleOpenDeleteDialog}>
+                Delete User
+              </Button>
+            )}
           </Box>
+
+          {/* Logout Button moved to the end */}
+          <Button color="inherit" onClick={handleLogout}>
+            Logout
+          </Button>
         </Toolbar>
       </AppBar>
 
       {/* Main Content */}
-      <Container maxWidth="lg" sx={{ mt: 4 }}>
+      <Container maxWidth="md" sx={{ mt: 4 }}>
         {error && <Typography color="error">{error}</Typography>}
 
         {/* All Users List */}
         {showAllUsers ? (
           <>
-            <Typography variant="h5" gutterBottom>All Users</Typography>
+            <Typography variant="h5" gutterBottom>
+              All Users
+            </Typography>
             <Grid container spacing={2}>
               {users.map((u) => (
-                <Grid item xs={12} key={u._id}>
+                <Grid item xs={12} sm={6} md={4} key={u._id}>
                   <Card sx={{ p: 2 }}>
-                    <Grid container alignItems="center" spacing={2}>
-                      <Grid item xs={12} sm={3}>
-                        <Typography variant="subtitle2"><strong>ID:</strong> {u._id}</Typography>
-                      </Grid>
-                      <Grid item xs={12} sm={2}>
-                        <Typography variant="subtitle1" fontWeight="bold">{u.username}</Typography>
-                      </Grid>
-                      <Grid item xs={12} sm={3}>
-                        <Typography variant="body2" color="textSecondary">{u.email}</Typography>
-                      </Grid>
-                      <Grid item xs={12} sm={2}>
-                        <Typography variant="body2" color="primary">{u.role}</Typography>
-                      </Grid>
-                      <Grid item xs={12} sm={2}>
-                        <Button
-                          variant="outlined"
-                          color="error"
-                          size="small"
-                          onClick={() => handleDeleteUser(u.email)}
-                        >
-                          Delete
-                        </Button>
-                      </Grid>
-                    </Grid>
+                    <Typography variant="subtitle1" fontWeight="bold">
+                      {u.username}
+                    </Typography>
+                    <Typography variant="body2" color="textSecondary">
+                      {u.email}
+                    </Typography>
                   </Card>
                 </Grid>
               ))}
             </Grid>
           </>
         ) : (
-          // User Profile View
           user && (
             <Card sx={{ p: 4, textAlign: 'center' }}>
               <Avatar
@@ -167,12 +185,42 @@ const AdminDashboard = () => {
               <Typography variant="h5" gutterBottom>
                 Welcome, {user.username} 👋
               </Typography>
-              <Typography variant="body1"><strong>Email:</strong> {user.email}</Typography>
-              <Typography variant="body1"><strong>Role:</strong> {user.role}</Typography>
+              <Typography variant="body1">
+                <strong>Email:</strong> {user.email}
+              </Typography>
+              <Typography variant="body1">
+                <strong>Role:</strong> {user.role}
+              </Typography>
             </Card>
           )
         )}
       </Container>
+
+      {/* Delete User Dialog */}
+      <Dialog open={openDeleteDialog} onClose={handleCloseDeleteDialog}>
+        <DialogTitle>Delete User</DialogTitle>
+        <DialogContent>
+          <Typography variant="body2" sx={{ mb: 2 }}>
+            Enter the email address of the user you wish to delete.
+          </Typography>
+          <TextField
+            label="User Email"
+            variant="outlined"
+            fullWidth
+            value={deleteEmail}
+            onChange={(e) => setDeleteEmail(e.target.value)}
+            size="small"
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDeleteDialog} color="primary">
+            Cancel
+          </Button>
+          <Button onClick={handleDeleteUserByEmail} color="error">
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };
