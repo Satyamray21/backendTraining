@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { TextField, Button, Grid, Typography, Box } from '@mui/material';
 
 const Login = () => {
-  const [identifier, setIdentifier] = useState('');  // 'identifier' can be username or email
+  const [identifier, setIdentifier] = useState(''); // Email or username
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const navigate = useNavigate();
@@ -13,17 +13,17 @@ const Login = () => {
     e.preventDefault();
 
     try {
-      // Make the login API request to the backend
-      console.log("Sending request with", { email: identifier, password });
-      const response = await axios.post('http://localhost:5000/api/v1/users/login', {
-        email: identifier,  // Backend handles both email and username
-        password
-      }, {
-        withCredentials: true // To send cookies along with the request
-      });
+      const response = await axios.post(
+        'http://localhost:5000/api/v1/users/login',
+        {
+          email: identifier,
+          password,
+        },
+        { withCredentials: true }
+      );
 
       console.log('Login successful:', response.data);
-      navigate('/dashboard'); // Navigate to the dashboard or home page
+      navigate('/dashboard');
 
     } catch (error) {
       setError(error.response?.data?.message || 'Something went wrong!');
@@ -38,7 +38,7 @@ const Login = () => {
 
       <form onSubmit={handleLogin}>
         <Grid container spacing={2}>
-          <Grid item>
+          <Grid item xs={12}>
             <TextField
               fullWidth
               label="Email or Username"
@@ -49,7 +49,7 @@ const Login = () => {
             />
           </Grid>
 
-          <Grid item>
+          <Grid item xs={12}>
             <TextField
               fullWidth
               type="password"
@@ -61,15 +61,21 @@ const Login = () => {
             />
           </Grid>
 
+          <Grid item xs={12} textAlign="right">
+            <Typography variant="body2" component={Link} to="/forgot-password" sx={{ textDecoration: 'none', color: 'primary.main', cursor: 'pointer' }}>
+              Forgot Password?
+            </Typography>
+          </Grid>
+
           {error && (
-            <Grid item>
+            <Grid item xs={12}>
               <Typography color="error" variant="body2" align="center">
                 {error}
               </Typography>
             </Grid>
           )}
 
-          <Grid item>
+          <Grid item xs={12}>
             <Button
               fullWidth
               type="submit"

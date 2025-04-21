@@ -4,14 +4,18 @@ import Login from './components/Login';
 import Register from './components/Register';
 import Dashboard from './components/Dashboard';
 import ChangePassword from './components/ChangePassword';
-import AdminDashboard from './components/AdminDashboard';  // New import for Admin Dashboard
-
+import AdminDashboard from './components/AdminDashboard';  
+import ForgotPassword from './components/ForgetPassword';
+import ResetPassword from './components/ResetPassword';
 function App() {
   return (
     <Routes>
       {/* Public Routes */}
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
+
 
       {/* User Routes */}
       <Route path="/dashboard" element={<Dashboard />} />
