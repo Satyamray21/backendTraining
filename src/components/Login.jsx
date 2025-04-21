@@ -23,7 +23,15 @@ const Login = () => {
       );
 
       console.log('Login successful:', response.data);
-      navigate('/dashboard');
+
+      
+      const { role } = response.data.data;
+
+      if (role === 'admin') {
+        navigate('/admin/dashboard');
+      } else {
+        navigate('/dashboard');
+      }
 
     } catch (error) {
       setError(error.response?.data?.message || 'Something went wrong!');
@@ -62,7 +70,12 @@ const Login = () => {
           </Grid>
 
           <Grid item xs={12} textAlign="right">
-            <Typography variant="body2" component={Link} to="/forgot-password" sx={{ textDecoration: 'none', color: 'primary.main', cursor: 'pointer' }}>
+            <Typography
+              variant="body2"
+              component={Link}
+              to="/forgot-password"
+              sx={{ textDecoration: 'none', color: 'primary.main', cursor: 'pointer' }}
+            >
               Forgot Password?
             </Typography>
           </Grid>

@@ -2,7 +2,7 @@ import React from 'react';
 import { Route, Routes } from 'react-router-dom';
 import Login from './components/Login';
 import Register from './components/Register';
-import Dashboard from './components/Dashboard';
+import UserDashboard from './components/UserDashboard';
 import ChangePassword from './components/ChangePassword';
 import AdminDashboard from './components/AdminDashboard';  
 import ForgotPassword from './components/ForgetPassword';
@@ -18,7 +18,7 @@ function App() {
 
 
       {/* User Routes */}
-      <Route path="/dashboard" element={<Dashboard />} />
+      <Route path="/dashboard" element={<UserDashboard />} />
       <Route path="/change-password" element={<ChangePassword />} />
 
       {/* Admin Routes */}
