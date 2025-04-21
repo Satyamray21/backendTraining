@@ -1,5 +1,14 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import {
+  Box,
+  Button,
+  TextField,
+  Typography,
+  Alert,
+  Stack,
+  Paper,
+} from '@mui/material';
 
 const ChangePassword = () => {
   const [oldPassword, setOldPassword] = useState('');
@@ -7,39 +16,25 @@ const ChangePassword = () => {
   const [errorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
 
-  // Handle form submission
   const handleChangePassword = async (e) => {
     e.preventDefault();
-
-    // Clear any previous success or error messages
     setErrorMessage('');
     setSuccessMessage('');
 
-    // Get the JWT token from localStorage (or wherever you store it)
-    const token = localStorage.getItem('authToken'); // Make sure it's stored securely!
-
-    if (!token) {
-      setErrorMessage('No authentication token found. Please log in.');
-      return;
-    }
-
     try {
-      const response = await axios.put(
-        'http://localhost:5000/api/v1/users/changepassword',
-        { oldpassword: oldPassword, newPassword: newPassword },
+      const response = await axios.post(
+        'http://localhost:5000/api/v1/users/changePassword',
+        { oldpassword: oldPassword, newPassword },
         {
-          headers: {
-            Authorization: `Bearer ${token}`, // Send the token in the Authorization header
-          },
+          withCredentials: true, // Send cookie-based JWT
         }
       );
 
-      console.log('Password changed successfully:', response);
       setSuccessMessage('Password changed successfully!');
+      setOldPassword('');
+      setNewPassword('');
     } catch (error) {
-      console.error('Error occurred:', error);
       if (error.response) {
-        console.error('Backend error response:', error.response.data);
         setErrorMessage(error.response.data.message || 'Unknown error');
       } else {
         setErrorMessage('Network error or no response from the server');
@@ -48,33 +43,48 @@ const ChangePassword = () => {
   };
 
   return (
-    <div>
-      <h2>Change Password</h2>
-      <form onSubmit={handleChangePassword}>
-        <div>
-          <label>Old Password</label>
-          <input
-            type="password"
-            value={oldPassword}
-            onChange={(e) => setOldPassword(e.target.value)}
-            required
-          />
-        </div>
-        <div>
-          <label>New Password</label>
-          <input
-            type="password"
-            value={newPassword}
-            onChange={(e) => setNewPassword(e.target.value)}
-            required
-            minLength="6" // Optional: enforce minimum password length
-          />
-        </div>
-        {errorMessage && <div style={{ color: 'red' }}>{errorMessage}</div>}
-        {successMessage && <div style={{ color: 'green' }}>{successMessage}</div>}
-        <button type="submit">Change Password</button>
-      </form>
-    </div>
+    <Box
+      display="flex"
+      justifyContent="center"
+      alignItems="center"
+      minHeight="80vh"
+    >
+      <Paper elevation={3} sx={{ p: 4, width: 400 }}>
+        <Typography variant="h5" gutterBottom>
+          Change Password
+        </Typography>
+
+        <form onSubmit={handleChangePassword}>
+          <Stack spacing={2}>
+            <TextField
+              type="password"
+              label="Old Password"
+              value={oldPassword}
+              onChange={(e) => setOldPassword(e.target.value)}
+              required
+              fullWidth
+            />
+
+            <TextField
+              type="password"
+              label="New Password"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              required
+              fullWidth
+              inputProps={{ minLength: 6 }}
+            />
+
+            {errorMessage && <Alert severity="error">{errorMessage}</Alert>}
+            {successMessage && <Alert severity="success">{successMessage}</Alert>}
+
+            <Button type="submit" variant="contained" color="primary" fullWidth>
+              Change Password
+            </Button>
+          </Stack>
+        </form>
+      </Paper>
+    </Box>
   );
 };
 
